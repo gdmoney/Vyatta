@@ -1,0 +1,55 @@
+
+set system login user cfnadmin level admin
+set system login user cfnadmin authentication plaintext-password Blind5173
+set system host-name Vyatta-1
+set system name-server 208.67.222.222
+set system time-zone US/Pacific
+
+set interfaces ethernet eth0 address 204.193.38.254/24
+set interfaces ethernet eth1 vif 10 address 172.27.10.1/24
+set interfaces ethernet eth1 vif 20 address 172.27.20.1/24
+
+set protocols static route 0.0.0.0/0 next-hop 204.193.38.1
+set protocols ospf area 19 network 10.191.65.0/24
+
+set service ssh/https/dhcp-server/snmp/lldp
+
+set service dhcp-server shared-network-name VLAN10_POOL subnet 172.27.10.0/24 start 172.27.10.11 stop 172.27.10.20
+set service dhcp-server shared-network-name VLAN10_POOL subnet 172.27.10.0/24 default-router 172.27.10.1
+set service dhcp-server shared-network-name VLAN10_POOL subnet 172.27.10.0/24 dns-server 208.67.222.222
+
+set nat source rule 10
+set nat source rule 10 source address 172.27.10.0/24
+set nat source rule 10 outbound-interface eth0
+set nat source rule 10 translation address masquerade
+
+set nat source rule 20
+set nat source rule 20 source address 172.27.10.12
+set nat source rule 20 outbound-interface eth0
+set nat source rule 20 translation address 204.193.38.254
+
+set nat destination rule 20
+set nat destination rule 20 destination address 204.193.38.254
+set nat destination rule 20 inbound-interface eth0
+set nat destination rule 20 translation address 172.27.10.12
+set nat destination rule 20 protocol tcp
+set nat destination rule 20 destination port http
+set nat destination rule 20 source address 10.191.80.0/24
+
+
+discard  - discard uncommitted changes
+rollback - rollback to a prior config revision
+
+# save ftp://cisco:cisco@10.191.80.76/config.boot
+# load ftp://cisco:cisco@10.191.80.76/config.boot
+
+$ copy file running://config/config.boot to ftp:/cisco:cisco@10.191.80.76/config.boot
+
+
+
+
+
+
+
+		
+
